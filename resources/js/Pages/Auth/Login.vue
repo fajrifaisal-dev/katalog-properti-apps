@@ -31,70 +31,92 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Log in" />
+        <Head title="Login" />
 
-        <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
-            {{ status }}
+        <div class="min-h-screen flex items-center justify-center bg-[#0B1F4A] relative overflow-hidden">
+
+            <!-- Background Accent -->
+            <div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_#C9A84C,_transparent_70%)]"></div>
+
+            <!-- Card -->
+            <div class="w-full max-w-md bg-white rounded-sm shadow-2xl p-8 relative z-10">
+
+                <!-- Header -->
+                <div class="mb-6 text-center">
+                    <h1 class="text-3xl font-serif text-[#0B1F4A]">
+                        Welcome Back
+                    </h1>
+                    <p class="text-sm text-gray-500 mt-1">
+                        Login to your account
+                    </p>
+                </div>
+
+                <!-- Status -->
+                <div v-if="status" class="mb-4 text-sm font-medium text-green-600 text-center">
+                    {{ status }}
+                </div>
+
+                <!-- Form -->
+                <form @submit.prevent="submit">
+
+                    <!-- Email -->
+                    <div>
+                        <InputLabel for="email" value="Email" class="text-[#0B1F4A]" />
+                        <TextInput
+                            id="email"
+                            type="email"
+                            class="mt-1 block w-full border-gray-300 focus:border-[#C9A84C] focus:ring-[#C9A84C]"
+                            v-model="form.email"
+                            required
+                            autofocus
+                            autocomplete="username"
+                        />
+                        <InputError class="mt-2" :message="form.errors.email" />
+                    </div>
+
+                    <!-- Password -->
+                    <div class="mt-4">
+                        <InputLabel for="password" value="Password" class="text-[#0B1F4A]" />
+                        <TextInput
+                            id="password"
+                            type="password"
+                            class="mt-1 block w-full border-gray-300 focus:border-[#C9A84C] focus:ring-[#C9A84C]"
+                            v-model="form.password"
+                            required
+                            autocomplete="current-password"
+                        />
+                        <InputError class="mt-2" :message="form.errors.password" />
+                    </div>
+
+                    <!-- Remember -->
+                    <div class="mt-4 flex items-center justify-between">
+                        <label class="flex items-center">
+                            <Checkbox name="remember" v-model:checked="form.remember" />
+                            <span class="ms-2 text-sm text-gray-600">Remember me</span>
+                        </label>
+
+                        <Link
+                            v-if="canResetPassword"
+                            :href="route('password.request')"
+                            class="text-sm text-[#0B1F4A] hover:text-[#C9A84C]"
+                        >
+                            Forgot?
+                        </Link>
+                    </div>
+
+                    <!-- Button -->
+                    <div class="mt-6">
+                        <button
+                            type="submit"
+                            :disabled="form.processing"
+                            class="w-full bg-[#C9A84C] text-[#0B1F4A] py-2 rounded-sm font-semibold hover:bg-[#E2C06A] transition duration-200 disabled:opacity-50"
+                        >
+                            Log in
+                        </button>
+                    </div>
+
+                </form>
+            </div>
         </div>
-
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="email" value="Email" />
-
-                <TextInput
-                    id="email"
-                    type="email"
-                    class="mt-1 block w-full"
-                    v-model="form.email"
-                    required
-                    autofocus
-                    autocomplete="username"
-                />
-
-                <InputError class="mt-2" :message="form.errors.email" />
-            </div>
-
-            <div class="mt-4">
-                <InputLabel for="password" value="Password" />
-
-                <TextInput
-                    id="password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password"
-                    required
-                    autocomplete="current-password"
-                />
-
-                <InputError class="mt-2" :message="form.errors.password" />
-            </div>
-
-            <div class="mt-4 block">
-                <label class="flex items-center">
-                    <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ms-2 text-sm text-gray-600"
-                        >Remember me</span
-                    >
-                </label>
-            </div>
-
-            <div class="mt-4 flex items-center justify-end">
-                <Link
-                    v-if="canResetPassword"
-                    :href="route('password.request')"
-                    class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                >
-                    Forgot your password?
-                </Link>
-
-                <PrimaryButton
-                    class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Log in
-                </PrimaryButton>
-            </div>
-        </form>
     </GuestLayout>
 </template>

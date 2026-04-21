@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('properties', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('kategori_id')->constrained('category_properties');
+            $table->string('nama_properti', 200);
+            $table->string('lokasi', 200);
+            $table->decimal('harga', 15, 2);
+            $table->text('deskripsi')->nullable();
+            $table->string('gambar', 255)->nullable();
             $table->timestamps();
         });
     }
