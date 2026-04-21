@@ -1,3 +1,53 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* === FONT IMPORT === */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@300;400;500&display=swap');
+
+/* === BASE STYLE === */
+@layer base {
+    body {
+        @apply bg-gray-50 text-gray-800;
+        font-family: 'DM Sans', sans-serif;
+    }
+
+    h1, h2, h3, h4 {
+        font-family: 'Cormorant Garamond', serif;
+    }
+}
+
+/* === COMPONENT CUSTOM === */
+@layer components {
+
+    /* Sidebar Menu */
+    .menu-item {
+        @apply flex items-center px-6 py-3 text-sm text-gray-300 transition-all duration-200;
+    }
+
+    .menu-item:hover {
+        background-color: #C9A84C;
+        color: #0B1F4A;
+    }
+
+    .menu-active {
+        background-color: #C9A84C;
+        color: #0B1F4A;
+    }
+
+    /* Card Properti (buat next step) */
+    .card-properti {
+        @apply bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition;
+    }
+
+    /* Button Gold */
+    .btn-gold {
+        background-color: #C9A84C;
+        color: #0B1F4A;
+        @apply px-4 py-2 rounded-md font-medium transition;
+    }
+
+    .btn-gold:hover {
+        opacity: 0.9;
+    }
+}

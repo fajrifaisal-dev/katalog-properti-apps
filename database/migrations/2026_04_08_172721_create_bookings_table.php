@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('properti_id')->constrained('properties');
+            $table->foreignId('client_id')->constrained('clients');
+            $table->foreignId('user_id')->nullable()->constrained('users');
+            $table->date('tanggal_konsultasi');
+            $table->enum('status', ['Menunggu', 'Disetujui', 'Ditolak'])->default('Menunggu');
+            $table->string('nomor_booking', 50)->nullable();
+            $table->text('catatan')->nullable();
             $table->timestamps();
         });
     }
