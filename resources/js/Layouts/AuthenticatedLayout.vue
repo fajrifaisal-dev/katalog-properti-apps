@@ -1,90 +1,108 @@
 <script setup>
-import { ref } from 'vue'
+import { Link, usePage } from '@inertiajs/vue3'
 import ApplicationLogo from '@/Components/ApplicationLogo.vue'
 
-const sidebarOpen = ref(true)
+const page = usePage()
 
-// MENU USER (CALON KLIEN)
-const userMenus = [
-    { name: 'Katalog Properti', icon: '🏘️', href: '#' },
-    { name: 'Cari Properti', icon: '🔍', href: '#' },
+// MENU ADMIN
+const menus = [
+    { name: 'Dashboard', icon: '🏠', href: route('dashboard') },
+    { name: 'Kategori', icon: '📂', href: route('categories.index') },
+    // sementara disable dulu
+    { name: 'Katalog Properti', icon: '🏘️', href: route('properties.index') },
     { name: 'Booking Konsultasi', icon: '📅', href: '#' },
-]
-
-// MENU ADMIN / MARKETING
-const adminMenus = [
-    { name: 'Kelola Properti', icon: '🏗️', href: '#' },
-    { name: 'Kategori Properti', icon: '📂', href: '#' },
-    { name: 'Jadwal Konsultasi', icon: '🗓️', href: '#' },
     { name: 'Data Klien', icon: '👥', href: '#' },
 ]
 
-// SIMULASI ROLE (nanti bisa dari auth)
-const role = 'admin' // ganti 'user' kalau mau test user view
+// helper untuk active menu
+const isActive = (href) => {
+    return page.url.startsWith(new URL(href, window.location.origin).pathname)
+}
 </script>
 
 <template>
-    <div class="flex min-h-screen bg-gray-100">
+    <div class="flex min-h-screen bg-[#F8F8F8]">
 
         <!-- SIDEBAR -->
-        <aside class="w-64 bg-white shadow-lg">
-            <div class="p-4 border-b">
-                <ApplicationLogo class="h-10" />
+        <aside class="w-64 bg-[#0B1F4A] text-white flex flex-col">
+
+            <!-- LOGO -->
+            <div class="px-6 py-6 border-b border-white/10 flex items-center gap-3">
+                <ApplicationLogo class="h-10 w-10 text-white" />
+
+                <div>
+                    <h1 class="text-sm font-semibold leading-tight">
+                        IKK GROUP
+                    </h1>
+                    <p class="text-xs text-gray-300">
+                        Properti & Development
+                    </p>
+                </div>
             </div>
 
-            <nav class="mt-4">
-                <!-- USER MENU -->
-                <div v-if="role === 'user'">
-                    <a
-                        v-for="menu in userMenus"
-                        :key="menu.name"
-                        :href="menu.href"
-                        class="flex items-center px-4 py-3 hover:bg-gray-100 transition"
-                    >
-                        <span class="mr-3">{{ menu.icon }}</span>
-                        {{ menu.name }}
-                    </a>
-                </div>
-
-                <!-- ADMIN MENU -->
-                <div v-if="role === 'admin'">
-                    <a
-                        v-for="menu in adminMenus"
-                        :key="menu.name"
-                        :href="menu.href"
-                        class="flex items-center px-4 py-3 hover:bg-gray-100 transition"
-                    >
-                        <span class="mr-3">{{ menu.icon }}</span>
-                        {{ menu.name }}
-                    </a>
-                </div>
+            <!-- MENU -->
+            <nav class="flex-1 mt-4">
+                <Link
+                    v-for="menu in menus"
+                    :key="menu.name"
+                    :href="menu.href"
+                    class="flex items-center px-6 py-3 text-sm transition-all duration-200"
+                    :class="[
+                        isActive(menu.href)
+                            ? 'bg-[#C9A84C] text-[#0B1F4A] font-semibold'
+                            : 'text-gray-300 hover:bg-[#C9A84C] hover:text-[#0B1F4A]'
+                    ]"
+                >
+                    <span class="mr-3 text-base">
+                        {{ menu.icon }}
+                    </span>
+                    {{ menu.name }}
+                </Link>
             </nav>
+
+            <!-- FOOTER -->
+            <div class="px-6 py-4 border-t border-white/10 text-xs text-gray-400">
+                © 2026 IKK Properti
+            </div>
         </aside>
 
-        <!-- MAIN CONTENT -->
+        <!-- MAIN -->
         <div class="flex-1 flex flex-col">
 
-            <!-- TOPBAR -->
-            <header class="bg-white shadow px-6 py-4 flex justify-between items-center">
-                <h1 class="text-lg font-semibold">
-                    Dashboard Properti
-                </h1>
+            <!-- TOP NAVBAR -->
+            <header class="bg-white px-8 py-4 flex justify-between items-center shadow-sm">
+
+                <div>
+                    <h2 class="text-xl font-semibold text-[#0B1F4A]">
+                        Dashboard
+                    </h2>
+                    <p class="text-xs text-gray-500">
+                        Sistem Manajemen Properti
+                    </p>
+                </div>
 
                 <div class="flex items-center gap-4">
-                    <span class="text-gray-700">
-                        {{ $page.props.auth.user.name }}
+                    <span class="text-sm text-gray-700">
+                        {{ $page.props.auth?.user?.name || 'Admin' }}
                     </span>
 
-                    <button class="text-red-500 hover:underline">
+                    <Link
+                        :href="route('logout')"
+                        method="post"
+                        as="button"
+                        class="text-sm text-[#C9A84C] hover:underline"
+                    >
                         Logout
-                    </button>
+                    </Link>
                 </div>
             </header>
 
             <!-- CONTENT -->
-            <main class="p-6">
+            <main class="p-8">
                 <slot />
             </main>
+
         </div>
+
     </div>
 </template>
