@@ -241,6 +241,15 @@ const goToPage = (url) => {
 
                 <form @submit.prevent="submitTambah" class="space-y-3">
 
+
+                    <!-- KATEGORI -->
+                    <select v-model="formTambah.kategori_id" class="w-full border p-2 rounded">
+                        <option value="">Pilih Kategori</option>
+                        <option v-for="kat in props.kategori" :key="kat.id" :value="kat.id">
+                            {{ kat.nama_kategori }}
+                        </option>
+                    </select>
+
                     <!-- NAMA -->
                     <input v-model="formTambah.nama_properti" placeholder="Nama Properti"
                         class="w-full border p-2 rounded" />
@@ -248,10 +257,20 @@ const goToPage = (url) => {
                     <!-- LOKASI -->
                     <input v-model="formTambah.lokasi" placeholder="Lokasi" class="w-full border p-2 rounded" />
 
-                    <!-- 🔥 HARGA FORMAT -->
+                    <!-- HARGA -->
                     <input :value="formatRupiahInput(formTambah.harga)"
                         @input="formTambah.harga = parseRupiah($event.target.value)" placeholder="Harga"
                         class="w-full border p-2 rounded" />
+
+                    <!-- DESKRIPSI -->
+                    <textarea v-model="formTambah.deskripsi" placeholder="Deskripsi"
+                        class="w-full border p-2 rounded"></textarea>
+
+                    <!-- GAMBAR -->
+                    <input type="file" @change="onGambarTambah" />
+
+                    <!-- PREVIEW -->
+                    <img v-if="previewTambah" :src="previewTambah" class="w-full h-40 object-cover rounded mt-2" />
 
                     <button class="bg-blue-600 text-white px-4 py-2 rounded">
                         Simpan
