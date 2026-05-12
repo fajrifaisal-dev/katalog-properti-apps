@@ -3,6 +3,8 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\CategoryPropertyController;
 use App\Http\Controllers\Admin\PropertyController;
+use App\Http\Controllers\BookingController;
+use App\Http\Controllers\Admin\ClientController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -12,6 +14,21 @@ use Inertia\Inertia;
 | Public Route
 |--------------------------------------------------------------------------
 */
+
+/*
+|--------------------------------------------------------------------------
+| BOOKING PUBLIC
+|--------------------------------------------------------------------------
+*/
+Route::get('/booking', [BookingController::class, 'create'])->name('booking.create');
+Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
+
+Route::get('/cek-booking', function () {
+    return Inertia::render('Public/CekBooking');
+});
+
+Route::post('/cek-booking', [BookingController::class, 'cek']);
+Route::get('/booking-slots', [BookingController::class, 'getSlots']);
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -27,7 +44,6 @@ Route::get('/', function () {
 | Authenticated Routes
 |--------------------------------------------------------------------------
 */
-
 Route::middleware(['auth', 'verified'])->group(function () {
 
     // Dashboard
@@ -56,10 +72,30 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/categories', CategoryPropertyController::class)
         ->names('categories');
 
-    // property
+    // Property
     Route::resource('/properties', PropertyController::class)
         ->names('properties')
         ->except(['create', 'edit', 'show']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Booking
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('admin/bookings')->name('admin.bookings.')->group(function () {
+        Route::get('/', [BookingController::class, 'index'])->name('index');
+        Route::get('/{booking}', [BookingController::class, 'show'])->name('show');
+        Route::patch('/{booking}/status', [BookingController::class, 'updateStatus'])->name('updateStatus');
+        Route::delete('/{booking}', [BookingController::class, 'destroy'])->name('destroy');
+    });
+
+    // di dalam group auth
+    Route::prefix('admin/clients')->name('admin.clients.')->group(function () {
+        Route::get('/', [ClientController::class, 'index'])->name('index');
+        Route::get('/{client}/edit', [ClientController::class, 'edit'])->name('edit');
+        Route::patch('/{client}', [ClientController::class, 'update'])->name('update');
+        Route::delete('/{client}', [ClientController::class, 'destroy'])->name('destroy');
+    });
 });
 
 /*
@@ -67,4 +103,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
 | Auth Routes (Login, Register, dll)
 |--------------------------------------------------------------------------
 */
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

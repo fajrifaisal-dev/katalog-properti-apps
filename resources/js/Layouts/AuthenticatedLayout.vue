@@ -10,8 +10,8 @@ const menus = [
     { name: 'Kategori', icon: '📂', href: route('categories.index') },
     // sementara disable dulu
     { name: 'Katalog Properti', icon: '🏘️', href: route('properties.index') },
-    { name: 'Booking Konsultasi', icon: '📅', href: '#' },
-    { name: 'Data Klien', icon: '👥', href: '#' },
+    { name: 'Booking Konsultasi', icon: '📅', href: route('admin.bookings.index') },
+    { name: 'Data Klien', icon: '👥', href: route('admin.clients.index') },
 ]
 
 // helper untuk active menu
