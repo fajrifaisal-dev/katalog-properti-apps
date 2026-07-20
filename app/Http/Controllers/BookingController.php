@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Services\BookingServices;
+use App\Models\CategoryProperty;
+use App\Models\Property;
 use App\Models\Booking;
 
 class BookingController extends Controller
@@ -24,18 +26,37 @@ class BookingController extends Controller
     |--------------------------------------------------------------------------
     */
     public function create()
-    {
-        return Inertia::render('Public/Booking', [
-            'jamList' => [
-                '09:00',
-                '10:00',
-                '11:00',
-                '13:00',
-                '14:00',
-                '15:00'
-            ]
-        ]);
-    }
+{
+    return Inertia::render('Public/Booking', [
+
+        'jamList' => [
+            '09:00',
+            '10:00',
+            '11:00',
+            '13:00',
+            '14:00',
+            '15:00'
+        ],
+
+        'categories' => CategoryProperty::orderBy('nama_kategori')
+            ->get([
+                'id',
+                'nama_kategori',
+                'deskripsi'
+            ]),
+
+        'properties' => Property::with('kategori')
+            ->orderBy('nama_properti')
+            ->get([
+                'id',
+                'kategori_id',
+                'nama_properti',
+                'lokasi',
+                'harga',
+                'gambar'
+            ])
+    ]);
+}
 
     /*
     |--------------------------------------------------------------------------
@@ -68,7 +89,12 @@ class BookingController extends Controller
 
         return back()->with([
             'success' => 'Booking berhasil dibuat!',
-            'booking_code' => $booking->nomor_booking
+            'booking_code' => $booking->nomor_booking,
+            'booking_data' => [
+                'nama' => $booking->client->nama,
+                'tanggal' => $booking->tanggal_konsultasi->translatedFormat('d F Y'),
+                'jam' => $booking->jam_konsultasi,
+            ],
         ]);
     }
 

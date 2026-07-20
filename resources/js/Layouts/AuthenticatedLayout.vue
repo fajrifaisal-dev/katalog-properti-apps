@@ -1,8 +1,28 @@
 <script setup>
-import { Link, usePage } from '@inertiajs/vue3'
+import { Link, usePage, } from '@inertiajs/vue3'
+import { ref, watch } from 'vue'
 import ApplicationLogo from '@/Components/ApplicationLogo.vue'
 
 const page = usePage()
+
+// TOAST FLASH MESSAGE
+const toast = ref(null) // { type: 'success' | 'error', message: string }
+
+watch(
+    () => page.props.flash,
+    (flash) => {
+        if (flash?.success) {
+            toast.value = { type: 'success', message: flash.success }
+        } else if (flash?.error) {
+            toast.value = { type: 'error', message: flash.error }
+        } else {
+            return
+        }
+
+        setTimeout(() => { toast.value = null }, 3000)
+    },
+    { deep: true, immediate: true }
+)
 
 // MENU ADMIN
 const menus = [
@@ -22,6 +42,13 @@ const isActive = (href) => {
 
 <template>
     <div class="flex min-h-screen bg-[#F8F8F8]">
+        <div
+            v-if="toast"
+            class="fixed top-5 right-5 z-[9999] px-4 py-3 rounded-lg shadow-lg text-sm text-white transition-all"
+            :class="toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'"
+        >
+            {{ toast.message }}
+        </div>
 
         <!-- SIDEBAR -->
         <aside class="w-64 bg-[#0B1F4A] text-white flex flex-col">

@@ -9,9 +9,6 @@ use Inertia\Inertia;
 
 class CategoryPropertyController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $kategori = CategoryProperty::withCount('properti')
@@ -23,29 +20,27 @@ class CategoryPropertyController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
             'nama_kategori' => 'required|string|max:150|unique:category_properties,nama_kategori',
             'deskripsi' => 'nullable|string',
+            'status_category' => 'nullable|in:aktif,tidak aktif',
         ], [
             'nama_kategori.required' => 'Nama kategori wajib diisi.',
             'nama_kategori.unique' => 'Nama kategori sudah digunakan.',
             'nama_kategori.max' => 'Nama kategori maksimal 150 karakter.',
         ]);
 
-        CategoryProperty::create($request->only('nama_kategori', 'deskripsi'));
+        CategoryProperty::create([
+            'nama_kategori' => $request->nama_kategori,
+            'deskripsi' => $request->deskripsi,
+            'status_category' => $request->status_category ?? 'aktif',
+        ]);
 
         return back()->with('success', 'Kategori berhasil ditambahkan.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    // update()
     public function update(Request $request, CategoryProperty $category)
     {
         $request->validate([
@@ -62,14 +57,33 @@ class CategoryPropertyController extends Controller
         return back()->with('success', 'Kategori berhasil diperbarui.');
     }
 
-    // destroy()
+    /**
+     * Toggle status aktif <-> tidak aktif
+     */
+    public function toggleStatus(CategoryProperty $category)
+    {
+        $newStatus = ($category->status_category ?? 'aktif') === 'aktif'
+            ? 'tidak aktif'
+            : 'aktif';
+
+        $category->update(['status_category' => $newStatus]);
+
+        return back()->with('success', "Status kategori diubah menjadi \"{$newStatus}\".");
+    }
+
     public function destroy(CategoryProperty $category)
     {
         if ($category->properti()->count() > 0) {
             return back()->with('error', 'Kategori tidak dapat dihapus karena masih memiliki properti terkait.');
         }
 
-        $category->delete();
+        if (($category->status_category ?? 'aktif') !== 'tidak aktif') {
+            return back()->with('error', 'Nonaktifkan kategori terlebih dahulu sebelum menghapus.');
+        }
+
+        $category->deleted_by = auth()->user()->name ?? auth()->id();
+        $category->save();
+        $category->delete(); // soft delete (isi deleted_at)
 
         return back()->with('success', 'Kategori berhasil dihapus.');
     }
