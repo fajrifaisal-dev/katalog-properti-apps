@@ -71,6 +71,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Category Property
     Route::resource('/categories', CategoryPropertyController::class)
         ->names('categories');
+    Route::patch('/categories/{category}/toggle-status', [CategoryPropertyController::class, 'toggleStatus'])
+        ->name('categories.toggleStatus');
 
     // Property
     Route::resource('/properties', PropertyController::class)

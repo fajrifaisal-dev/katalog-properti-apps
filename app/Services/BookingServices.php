@@ -1,22 +1,19 @@
 <?php
 
 namespace App\Services;
-
 use App\Models\Booking;
 use App\Models\Client;
+use App\Mail\BookingConfirmation;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class BookingServices
 {
     public function createBooking(array $data)
     {
-        return DB::transaction(function () use ($data) {
+        $booking = DB::transaction(function () use ($data) {
 
-            /*
-            |--------------------------------------------------------------------------
-            | 1. FIND / CREATE CLIENT
-            |--------------------------------------------------------------------------
-            */
             $client = Client::firstOrCreate(
                 ['no_hp' => $data['no_hp']],
                 [
@@ -25,18 +22,9 @@ class BookingServices
                 ]
             );
 
-            /*
-            |--------------------------------------------------------------------------
-            | 2. GENERATE NOMOR BOOKING
-            |--------------------------------------------------------------------------
-            */
             $kode = $this->generateKodeBooking();
 
-            /*
-            |--------------------------------------------------------------------------
-            | 3. CREATE BOOKING
-            |--------------------------------------------------------------------------*/
-            $booking = Booking::create([
+            return Booking::create([
                 'client_id' => $client->id,
                 'properti_id' => $data['properti_id'],
                 'tanggal_konsultasi' => $data['tanggal_konsultasi'],
@@ -45,9 +33,31 @@ class BookingServices
                 'nomor_booking' => $kode,
                 'catatan' => $data['catatan'] ?? null,
             ]);
-
-            return $booking;
         });
+
+        // Load relasi yang dipakai di email
+        $booking->load(['client', 'property']);
+
+        // Kirim email
+        $this->sendBookingEmail($booking);
+
+        return $booking;
+    }
+
+    private function sendBookingEmail(Booking $booking): void
+    {
+        if (empty($booking->client->email)) {
+            return;
+        }
+
+        try {
+            Mail::to($booking->client->email)
+                ->send(new BookingConfirmation($booking));
+        } catch (\Throwable $e) {
+            Log::error(
+                "Gagal mengirim email booking {$booking->nomor_booking}: {$e->getMessage()}"
+            );
+        }
     }
 
     /*
