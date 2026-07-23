@@ -1,5 +1,5 @@
 <script setup>
-import { Link, usePage, } from '@inertiajs/vue3'
+import { Link, usePage } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
 import ApplicationLogo from '@/Components/ApplicationLogo.vue'
 
@@ -24,11 +24,23 @@ watch(
     { deep: true, immediate: true }
 )
 
+// MOBILE SIDEBAR TOGGLE
+const sidebarOpen = ref(false)
+
+const closeSidebar = () => {
+    sidebarOpen.value = false
+}
+
+// tutup otomatis kalau pindah halaman
+watch(
+    () => page.url,
+    () => { sidebarOpen.value = false }
+)
+
 // MENU ADMIN
 const menus = [
     { name: 'Dashboard', icon: '🏠', href: route('dashboard') },
     { name: 'Kategori', icon: '📂', href: route('categories.index') },
-    // sementara disable dulu
     { name: 'Katalog Properti', icon: '🏘️', href: route('properties.index') },
     { name: 'Booking Konsultasi', icon: '📅', href: route('admin.bookings.index') },
     { name: 'Data Klien', icon: '👥', href: route('admin.clients.index') },
@@ -50,25 +62,47 @@ const isActive = (href) => {
             {{ toast.message }}
         </div>
 
+        <!-- OVERLAY (mobile only, muncul saat sidebar open) -->
+        <div
+            v-if="sidebarOpen"
+            @click="closeSidebar"
+            class="fixed inset-0 bg-black/50 z-30 lg:hidden"
+        ></div>
+
         <!-- SIDEBAR -->
-        <aside class="w-64 bg-[#0B1F4A] text-white flex flex-col">
+        <aside
+            class="w-64 bg-[#0B1F4A] text-white flex flex-col fixed inset-y-0 left-0 z-40 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto"
+            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+        >
 
             <!-- LOGO -->
-            <div class="px-6 py-6 border-b border-white/10 flex items-center gap-3">
-                <ApplicationLogo class="h-10 w-10 text-white" />
+            <div class="px-6 py-6 border-b border-white/10 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <ApplicationLogo class="h-10 w-10 text-white" />
 
-                <div>
-                    <h1 class="text-sm font-semibold leading-tight">
-                        IKK GROUP
-                    </h1>
-                    <p class="text-xs text-gray-300">
-                        Properti & Development
-                    </p>
+                    <div>
+                        <h1 class="text-sm font-semibold leading-tight">
+                            IKK GROUP
+                        </h1>
+                        <p class="text-xs text-gray-300">
+                            Properti & Development
+                        </p>
+                    </div>
                 </div>
+
+                <!-- tombol close, mobile only -->
+                <button
+                    @click="closeSidebar"
+                    class="lg:hidden text-gray-300 hover:text-white"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
 
             <!-- MENU -->
-            <nav class="flex-1 mt-4">
+            <nav class="flex-1 mt-4 overflow-y-auto">
                 <Link
                     v-for="menu in menus"
                     :key="menu.name"
@@ -94,22 +128,34 @@ const isActive = (href) => {
         </aside>
 
         <!-- MAIN -->
-        <div class="flex-1 flex flex-col">
+        <div class="flex-1 flex flex-col min-w-0">
 
             <!-- TOP NAVBAR -->
-            <header class="bg-white px-8 py-4 flex justify-between items-center shadow-sm">
+            <header class="bg-white px-4 sm:px-8 py-4 flex justify-between items-center shadow-sm">
 
-                <div>
-                    <h2 class="text-xl font-semibold text-[#0B1F4A]">
-                        Dashboard
-                    </h2>
-                    <p class="text-xs text-gray-500">
-                        Sistem Manajemen Properti
-                    </p>
+                <div class="flex items-center gap-3">
+                    <!-- tombol hamburger, mobile only -->
+                    <button
+                        @click="sidebarOpen = true"
+                        class="lg:hidden text-[#0B1F4A]"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+
+                    <div>
+                        <h2 class="text-lg sm:text-xl font-semibold text-[#0B1F4A]">
+                            Dashboard
+                        </h2>
+                        <p class="text-xs text-gray-500 hidden sm:block">
+                            Sistem Manajemen Properti
+                        </p>
+                    </div>
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <span class="text-sm text-gray-700">
+                    <span class="text-sm text-gray-700 hidden sm:inline">
                         {{ $page.props.auth?.user?.name || 'Admin' }}
                     </span>
 
@@ -125,7 +171,7 @@ const isActive = (href) => {
             </header>
 
             <!-- CONTENT -->
-            <main class="p-8">
+            <main class="p-4 sm:p-8">
                 <slot />
             </main>
 

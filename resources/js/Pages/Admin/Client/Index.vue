@@ -38,12 +38,12 @@ const confirmDelete = (id) => {
         <div class="space-y-6">
 
             <!-- Header -->
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                    <h1 class="text-2xl font-bold text-[#0B1F4A]">Data Client</h1>
+                    <h1 class="text-xl sm:text-2xl font-bold text-[#0B1F4A]">Data Client</h1>
                     <p class="text-sm text-gray-500 mt-0.5">Kelola semua data klien yang pernah booking</p>
                 </div>
-                <div class="text-sm text-gray-500 bg-white border border-gray-200 rounded-lg px-4 py-2">
+                <div class="text-sm text-gray-500 bg-white border border-gray-200 rounded-lg px-4 py-2 self-start sm:self-auto">
                     Total: <span class="font-semibold text-[#0B1F4A]">{{ clients.total }}</span> client
                 </div>
             </div>
@@ -62,7 +62,7 @@ const confirmDelete = (id) => {
 
             <!-- Filter -->
             <div class="bg-white rounded-xl border border-gray-200 p-4">
-                <div class="relative max-w-sm">
+                <div class="relative w-full sm:max-w-sm">
                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
                     <input
                         v-model="search"
@@ -73,8 +73,14 @@ const confirmDelete = (id) => {
                 </div>
             </div>
 
-            <!-- Table -->
-            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <!-- Empty state (shared) -->
+            <div v-if="clients.data.length === 0" class="bg-white rounded-xl border border-gray-200 text-center py-16 text-gray-400">
+                <div class="text-4xl mb-2">👤</div>
+                <p>Tidak ada data client</p>
+            </div>
+
+            <!-- TABLE — desktop / tablet -->
+            <div v-else class="hidden md:block bg-white rounded-xl border border-gray-200 overflow-hidden">
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="bg-[#0B1F4A] text-white text-left">
@@ -86,12 +92,6 @@ const confirmDelete = (id) => {
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        <tr v-if="clients.data.length === 0">
-                            <td colspan="5" class="text-center py-16 text-gray-400">
-                                <div class="text-4xl mb-2">👤</div>
-                                <p>Tidak ada data client</p>
-                            </td>
-                        </tr>
                         <tr
                             v-for="c in clients.data"
                             :key="c.id"
@@ -126,12 +126,50 @@ const confirmDelete = (id) => {
                 </table>
             </div>
 
+            <!-- CARDS — mobile -->
+            <div v-if="clients.data.length > 0" class="md:hidden space-y-3">
+                <div
+                    v-for="c in clients.data"
+                    :key="c.id"
+                    class="bg-white rounded-xl border border-gray-200 p-4 space-y-3"
+                >
+                    <div class="flex items-start justify-between gap-2">
+                        <div>
+                            <div class="font-medium text-[#0B1F4A]">{{ c.nama }}</div>
+                            <div class="text-xs text-gray-500">{{ c.no_hp }}</div>
+                        </div>
+                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#0B1F4A]/10 text-[#0B1F4A] text-xs font-semibold shrink-0">
+                            {{ c.bookings_count }}
+                        </span>
+                    </div>
+
+                    <div class="text-sm text-gray-500">
+                        ✉️ {{ c.email ?? '-' }}
+                    </div>
+
+                    <div class="flex items-center gap-2 pt-2 border-t border-gray-100">
+                        <Link
+                            :href="route('admin.clients.edit', c.id)"
+                            class="flex-1 text-center text-xs px-3 py-2 rounded-lg bg-[#0B1F4A] text-white hover:bg-[#0d2660] transition-colors"
+                        >
+                            Edit
+                        </Link>
+                        <button
+                            @click="confirmDelete(c.id)"
+                            class="flex-1 text-center text-xs px-3 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+                        >
+                            Hapus
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Pagination -->
-            <div v-if="clients.last_page > 1" class="flex items-center justify-between">
+            <div v-if="clients.last_page > 1" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <p class="text-sm text-gray-500">
                     Menampilkan {{ clients.from }}–{{ clients.to }} dari {{ clients.total }} data
                 </p>
-                <div class="flex gap-1">
+                <div class="flex flex-wrap gap-1">
                     <Link
                         v-for="link in clients.links"
                         :key="link.label"

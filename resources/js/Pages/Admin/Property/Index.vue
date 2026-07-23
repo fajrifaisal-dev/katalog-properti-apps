@@ -31,7 +31,6 @@ const formatRupiah = (val) => {
     }).format(val)
 }
 
-// 🔥 FORMAT INPUT
 const formatRupiahInput = (value) => {
     if (!value) return ''
     return new Intl.NumberFormat('id-ID').format(value)
@@ -57,6 +56,13 @@ const onGambarTambah = (e) => {
     const file = e.target.files[0]
     formTambah.gambar = file
     previewTambah.value = file ? URL.createObjectURL(file) : null
+}
+
+const closeTambah = () => {
+    formTambah.reset()
+    formTambah.clearErrors()
+    previewTambah.value = null
+    showTambahModal.value = false
 }
 
 const submitTambah = () => {
@@ -90,8 +96,16 @@ const openEdit = (item) => {
     formEdit.harga = item.harga
     formEdit.deskripsi = item.deskripsi || ''
     formEdit.gambar = null
+    formEdit.clearErrors()
     previewEdit.value = item.gambar ? `/storage/${item.gambar}` : null
     showEditModal.value = true
+}
+
+const closeEdit = () => {
+    formEdit.clearErrors()
+    showEditModal.value = false
+    selectedItem.value = null
+    previewEdit.value = null
 }
 
 const onGambarEdit = (e) => {
@@ -131,7 +145,6 @@ const confirmHapus = () => {
     })
 }
 
-
 // ==============================
 // PAGINATION
 // ==============================
@@ -144,22 +157,25 @@ const goToPage = (url) => {
     <AuthenticatedLayout>
 
         <!-- HEADER -->
-        <div class="mb-6 flex items-center justify-between">
+        <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-                <h1 class="text-2xl font-semibold text-gray-800">Manajemen Properti</h1>
+                <h1 class="text-xl sm:text-2xl font-semibold text-gray-800">Manajemen Properti</h1>
                 <p class="text-sm text-gray-500">Kelola data properti yang tersedia</p>
             </div>
-            <button @click="showTambahModal = true" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
+            <button @click="showTambahModal = true" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm self-start sm:self-auto">
                 + Tambah Properti
             </button>
         </div>
 
-        <!-- TABLE -->
-        <div class="bg-white rounded-xl shadow overflow-hidden">
+        <!-- EMPTY STATE (shared) -->
+        <div v-if="props.properties.data.length === 0" class="bg-white rounded-xl shadow text-center p-8 text-gray-500">
+            Belum ada data properti
+        </div>
+
+        <!-- TABLE — desktop / tablet -->
+        <div v-else class="hidden md:block bg-white rounded-xl shadow overflow-hidden">
             <div class="w-full overflow-x-auto">
                 <table class="min-w-[1100px] text-sm border-collapse">
-
-                    <!-- HEADER -->
                     <thead class="bg-gray-100">
                         <tr>
                             <th class="p-3 text-left whitespace-nowrap">Gambar</th>
@@ -170,11 +186,8 @@ const goToPage = (url) => {
                             <th class="p-3 text-center whitespace-nowrap">Aksi</th>
                         </tr>
                     </thead>
-
-                    <!-- BODY -->
                     <tbody>
                         <tr v-for="item in props.properties.data" :key="item.id" class="border-b hover:bg-gray-50">
-                            <!-- GAMBAR -->
                             <td class="p-3 whitespace-nowrap">
                                 <img v-if="item.gambar" :src="`/storage/${item.gambar}`"
                                     class="w-16 h-12 object-cover rounded" />
@@ -184,17 +197,14 @@ const goToPage = (url) => {
                                 </div>
                             </td>
 
-                            <!-- NAMA -->
                             <td class="p-3 whitespace-nowrap font-medium">
                                 {{ item.nama_properti }}
                             </td>
 
-                            <!-- KATEGORI -->
                             <td class="p-3 whitespace-nowrap text-gray-600">
                                 {{ item.kategori?.nama_kategori || '-' }}
                             </td>
 
-                            <!-- 🔥 LOKASI (GOOGLE MAP + HANDLE TEXT PANJANG) -->
                             <td class="p-3 text-gray-600 max-w-[300px] break-words">
                                 <a :href="`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.lokasi)}`"
                                     target="_blank" class="text-blue-600 hover:underline">
@@ -202,12 +212,10 @@ const goToPage = (url) => {
                                 </a>
                             </td>
 
-                            <!-- HARGA -->
                             <td class="p-3 text-right font-semibold whitespace-nowrap">
                                 {{ formatRupiah(item.harga) }}
                             </td>
 
-                            <!-- AKSI -->
                             <td class="p-3 text-center whitespace-nowrap space-x-2">
                                 <button @click="openEdit(item)"
                                     class="bg-yellow-400 text-white px-3 py-1 rounded text-xs hover:opacity-90">
@@ -219,16 +227,48 @@ const goToPage = (url) => {
                                 </button>
                             </td>
                         </tr>
-
-                        <!-- EMPTY STATE -->
-                        <tr v-if="props.properties.data.length === 0">
-                            <td colspan="6" class="text-center p-4 text-gray-500">
-                                Belum ada data properti
-                            </td>
-                        </tr>
                     </tbody>
-
                 </table>
+            </div>
+        </div>
+
+        <!-- CARDS — mobile -->
+        <div v-if="props.properties.data.length > 0" class="md:hidden space-y-3">
+            <div
+                v-for="item in props.properties.data"
+                :key="item.id"
+                class="bg-white rounded-xl shadow p-4 space-y-3"
+            >
+                <div class="flex gap-3">
+                    <img v-if="item.gambar" :src="`/storage/${item.gambar}`"
+                        class="w-20 h-16 object-cover rounded shrink-0" />
+                    <div v-else
+                        class="w-20 h-16 bg-gray-100 rounded flex items-center justify-center text-xs text-gray-400 shrink-0">
+                        No img
+                    </div>
+
+                    <div class="min-w-0 flex-1">
+                        <div class="font-medium text-gray-800 truncate">{{ item.nama_properti }}</div>
+                        <div class="text-xs text-gray-500">{{ item.kategori?.nama_kategori || '-' }}</div>
+                        <div class="font-semibold text-sm mt-1">{{ formatRupiah(item.harga) }}</div>
+                    </div>
+                </div>
+
+                <a :href="`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.lokasi)}`"
+                    target="_blank" class="block text-sm text-blue-600 hover:underline break-words">
+                    📍 {{ item.lokasi }}
+                </a>
+
+                <div class="flex items-center gap-2 pt-2 border-t border-gray-100">
+                    <button @click="openEdit(item)"
+                        class="flex-1 bg-yellow-400 text-white px-3 py-2 rounded text-xs hover:opacity-90">
+                        Edit
+                    </button>
+                    <button @click="openHapus(item)"
+                        class="flex-1 bg-red-500 text-white px-3 py-2 rounded text-xs hover:opacity-90">
+                        Hapus
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -236,45 +276,83 @@ const goToPage = (url) => {
         <!-- =========================
          MODAL TAMBAH
     ========================= -->
-        <div v-if="showTambahModal" class="fixed inset-0 flex items-center justify-center bg-black/40">
-            <div class="bg-white p-6 rounded-xl w-full max-w-lg">
+        <div v-if="showTambahModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+            <div class="bg-white p-6 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+
+                <h2 class="text-lg font-semibold mb-3 text-gray-800">Tambah Properti</h2>
 
                 <form @submit.prevent="submitTambah" class="space-y-3">
 
-
                     <!-- KATEGORI -->
-                    <select v-model="formTambah.kategori_id" class="w-full border p-2 rounded">
-                        <option value="">Pilih Kategori</option>
-                        <option v-for="kat in props.kategori" :key="kat.id" :value="kat.id">
-                            {{ kat.nama_kategori }}
-                        </option>
-                    </select>
+                    <div>
+                        <select v-model="formTambah.kategori_id" class="w-full border p-2 rounded">
+                            <option value="">Pilih Kategori</option>
+                            <option v-for="kat in props.kategori" :key="kat.id" :value="kat.id">
+                                {{ kat.nama_kategori }}
+                            </option>
+                        </select>
+                        <p v-if="formTambah.errors.kategori_id" class="text-xs text-red-500 mt-1">
+                            {{ formTambah.errors.kategori_id }}
+                        </p>
+                    </div>
 
                     <!-- NAMA -->
-                    <input v-model="formTambah.nama_properti" placeholder="Nama Properti"
-                        class="w-full border p-2 rounded" />
+                    <div>
+                        <input v-model="formTambah.nama_properti" placeholder="Nama Properti"
+                            class="w-full border p-2 rounded" />
+                        <p v-if="formTambah.errors.nama_properti" class="text-xs text-red-500 mt-1">
+                            {{ formTambah.errors.nama_properti }}
+                        </p>
+                    </div>
 
                     <!-- LOKASI -->
-                    <input v-model="formTambah.lokasi" placeholder="Lokasi" class="w-full border p-2 rounded" />
+                    <div>
+                        <input v-model="formTambah.lokasi" placeholder="Lokasi" class="w-full border p-2 rounded" />
+                        <p v-if="formTambah.errors.lokasi" class="text-xs text-red-500 mt-1">
+                            {{ formTambah.errors.lokasi }}
+                        </p>
+                    </div>
 
                     <!-- HARGA -->
-                    <input :value="formatRupiahInput(formTambah.harga)"
-                        @input="formTambah.harga = parseRupiah($event.target.value)" placeholder="Harga"
-                        class="w-full border p-2 rounded" />
+                    <div>
+                        <input :value="formatRupiahInput(formTambah.harga)"
+                            @input="formTambah.harga = parseRupiah($event.target.value)" placeholder="Harga"
+                            class="w-full border p-2 rounded" />
+                        <p v-if="formTambah.errors.harga" class="text-xs text-red-500 mt-1">
+                            {{ formTambah.errors.harga }}
+                        </p>
+                    </div>
 
                     <!-- DESKRIPSI -->
-                    <textarea v-model="formTambah.deskripsi" placeholder="Deskripsi"
-                        class="w-full border p-2 rounded"></textarea>
+                    <div>
+                        <textarea v-model="formTambah.deskripsi" placeholder="Deskripsi"
+                            class="w-full border p-2 rounded"></textarea>
+                        <p v-if="formTambah.errors.deskripsi" class="text-xs text-red-500 mt-1">
+                            {{ formTambah.errors.deskripsi }}
+                        </p>
+                    </div>
 
                     <!-- GAMBAR -->
-                    <input type="file" @change="onGambarTambah" />
+                    <div>
+                        <input type="file" @change="onGambarTambah" />
+                        <p v-if="formTambah.errors.gambar" class="text-xs text-red-500 mt-1">
+                            {{ formTambah.errors.gambar }}
+                        </p>
+                    </div>
 
                     <!-- PREVIEW -->
                     <img v-if="previewTambah" :src="previewTambah" class="w-full h-40 object-cover rounded mt-2" />
 
-                    <button class="bg-blue-600 text-white px-4 py-2 rounded">
-                        Simpan
-                    </button>
+                    <!-- TOMBOL (satu-satunya, di paling bawah) -->
+                    <div class="flex justify-end gap-2 pt-2">
+                        <button type="button" @click="closeTambah" class="px-4 py-2 text-sm">
+                            Batal
+                        </button>
+                        <button type="submit" :disabled="formTambah.processing"
+                            class="bg-blue-600 text-white px-4 py-2 rounded text-sm disabled:opacity-50">
+                            {{ formTambah.processing ? 'Menyimpan...' : 'Simpan' }}
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -282,40 +360,68 @@ const goToPage = (url) => {
         <!-- =========================
          MODAL EDIT
     ========================= -->
-        <div v-if="showEditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div v-if="showEditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
 
             <div class="bg-white rounded-xl w-full max-w-lg max-h-[90vh] flex flex-col">
 
-                <!-- HEADER -->
                 <div class="p-4 border-b font-semibold">
                     Edit Properti
                 </div>
 
-                <!-- CONTENT (SCROLLABLE) -->
                 <div class="p-4 overflow-y-auto space-y-3">
 
                     <form @submit.prevent="submitEdit" class="space-y-3">
 
-                        <select v-model="formEdit.kategori_id" class="w-full border p-2 rounded">
-                            <option value="">Pilih Kategori</option>
-                            <option v-for="kat in props.kategori" :key="kat.id" :value="kat.id">
-                                {{ kat.nama_kategori }}
-                            </option>
-                        </select>
+                        <div>
+                            <select v-model="formEdit.kategori_id" class="w-full border p-2 rounded">
+                                <option value="">Pilih Kategori</option>
+                                <option v-for="kat in props.kategori" :key="kat.id" :value="kat.id">
+                                    {{ kat.nama_kategori }}
+                                </option>
+                            </select>
+                            <p v-if="formEdit.errors.kategori_id" class="text-xs text-red-500 mt-1">
+                                {{ formEdit.errors.kategori_id }}
+                            </p>
+                        </div>
 
-                        <input v-model="formEdit.nama_properti" placeholder="Nama Properti"
-                            class="w-full border p-2 rounded" />
+                        <div>
+                            <input v-model="formEdit.nama_properti" placeholder="Nama Properti"
+                                class="w-full border p-2 rounded" />
+                            <p v-if="formEdit.errors.nama_properti" class="text-xs text-red-500 mt-1">
+                                {{ formEdit.errors.nama_properti }}
+                            </p>
+                        </div>
 
-                        <input v-model="formEdit.lokasi" placeholder="Lokasi" class="w-full border p-2 rounded" />
+                        <div>
+                            <input v-model="formEdit.lokasi" placeholder="Lokasi" class="w-full border p-2 rounded" />
+                            <p v-if="formEdit.errors.lokasi" class="text-xs text-red-500 mt-1">
+                                {{ formEdit.errors.lokasi }}
+                            </p>
+                        </div>
 
-                        <input :value="formatRupiahInput(formEdit.harga)"
-                            @input="formEdit.harga = parseRupiah($event.target.value)" placeholder="Harga"
-                            class="w-full border p-2 rounded" />
+                        <div>
+                            <input :value="formatRupiahInput(formEdit.harga)"
+                                @input="formEdit.harga = parseRupiah($event.target.value)" placeholder="Harga"
+                                class="w-full border p-2 rounded" />
+                            <p v-if="formEdit.errors.harga" class="text-xs text-red-500 mt-1">
+                                {{ formEdit.errors.harga }}
+                            </p>
+                        </div>
 
-                        <textarea v-model="formEdit.deskripsi" placeholder="Deskripsi"
-                            class="w-full border p-2 rounded"></textarea>
+                        <div>
+                            <textarea v-model="formEdit.deskripsi" placeholder="Deskripsi"
+                                class="w-full border p-2 rounded"></textarea>
+                            <p v-if="formEdit.errors.deskripsi" class="text-xs text-red-500 mt-1">
+                                {{ formEdit.errors.deskripsi }}
+                            </p>
+                        </div>
 
-                        <input type="file" @change="onGambarEdit" />
+                        <div>
+                            <input type="file" @change="onGambarEdit" />
+                            <p v-if="formEdit.errors.gambar" class="text-xs text-red-500 mt-1">
+                                {{ formEdit.errors.gambar }}
+                            </p>
+                        </div>
 
                         <img v-if="previewEdit" :src="previewEdit" class="w-full h-40 object-cover rounded mt-2" />
 
@@ -323,14 +429,14 @@ const goToPage = (url) => {
 
                 </div>
 
-                <!-- FOOTER (STICKY) -->
                 <div class="p-4 border-t flex justify-end gap-2">
-                    <button type="button" @click="showEditModal = false">
+                    <button type="button" @click="closeEdit">
                         Batal
                     </button>
 
-                    <button @click="submitEdit" class="bg-yellow-500 text-white px-4 py-2 rounded">
-                        Update
+                    <button @click="submitEdit" :disabled="formEdit.processing"
+                        class="bg-yellow-500 text-white px-4 py-2 rounded disabled:opacity-50">
+                        {{ formEdit.processing ? 'Menyimpan...' : 'Update' }}
                     </button>
                 </div>
 
@@ -341,16 +447,14 @@ const goToPage = (url) => {
         <!-- =========================
      MODAL HAPUS
 ========================= -->
-        <div v-if="showHapusModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div v-if="showHapusModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
 
             <div class="bg-white rounded-xl w-full max-w-md p-6">
 
-                <!-- TITLE -->
                 <h2 class="text-lg font-semibold mb-2 text-gray-800">
                     Hapus Properti
                 </h2>
 
-                <!-- MESSAGE -->
                 <p class="text-sm text-gray-600 mb-4">
                     Yakin ingin menghapus properti
                     <span class="font-semibold">
@@ -358,11 +462,9 @@ const goToPage = (url) => {
                     </span> ?
                 </p>
 
-                <!-- OPTIONAL PREVIEW -->
                 <img v-if="selectedItem?.gambar" :src="`/storage/${selectedItem.gambar}`"
                     class="w-full h-32 object-cover rounded mb-4" />
 
-                <!-- ACTION -->
                 <div class="flex justify-end gap-2">
                     <button @click="showHapusModal = false" class="px-4 py-2 text-sm">
                         Batal

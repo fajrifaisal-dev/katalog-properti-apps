@@ -67,12 +67,12 @@ const confirmDelete = (id) => {
         <div class="space-y-6">
 
             <!-- Header -->
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                    <h1 class="text-2xl font-bold text-[#0B1F4A]">Booking Konsultasi</h1>
+                    <h1 class="text-xl sm:text-2xl font-bold text-[#0B1F4A]">Booking Konsultasi</h1>
                     <p class="text-sm text-gray-500 mt-0.5">Kelola semua jadwal konsultasi properti</p>
                 </div>
-                <div class="text-sm text-gray-500 bg-white border border-gray-200 rounded-lg px-4 py-2">
+                <div class="text-sm text-gray-500 bg-white border border-gray-200 rounded-lg px-4 py-2 self-start sm:self-auto">
                     Total: <span class="font-semibold text-[#0B1F4A]">{{ bookings.total }}</span> booking
                 </div>
             </div>
@@ -84,7 +84,7 @@ const confirmDelete = (id) => {
             </div>
 
             <!-- Filter Bar -->
-            <div class="bg-white rounded-xl border border-gray-200 p-4 flex flex-wrap gap-3">
+            <div class="bg-white rounded-xl border border-gray-200 p-4 flex flex-col sm:flex-row sm:flex-wrap gap-3">
                 <!-- Search -->
                 <div class="relative flex-1 min-w-[200px]">
                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
@@ -96,25 +96,33 @@ const confirmDelete = (id) => {
                     />
                 </div>
 
-                <!-- Status filter -->
-                <select
-                    v-model="status"
-                    class="text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C9A84C]/40 focus:border-[#C9A84C] bg-white"
-                >
-                    <option value="">Semua Status</option>
-                    <option v-for="s in statusList" :key="s" :value="s">{{ statusLabel(s) }}</option>
-                </select>
+                <div class="flex gap-3">
+                    <!-- Status filter -->
+                    <select
+                        v-model="status"
+                        class="flex-1 sm:flex-none text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C9A84C]/40 focus:border-[#C9A84C] bg-white"
+                    >
+                        <option value="">Semua Status</option>
+                        <option v-for="s in statusList" :key="s" :value="s">{{ statusLabel(s) }}</option>
+                    </select>
 
-                <!-- Tanggal filter -->
-                <input
-                    v-model="tanggal"
-                    type="date"
-                    class="text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C9A84C]/40 focus:border-[#C9A84C]"
-                />
+                    <!-- Tanggal filter -->
+                    <input
+                        v-model="tanggal"
+                        type="date"
+                        class="flex-1 sm:flex-none text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#C9A84C]/40 focus:border-[#C9A84C]"
+                    />
+                </div>
             </div>
 
-            <!-- Table -->
-            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <!-- Empty state (shared) -->
+            <div v-if="bookings.data.length === 0" class="bg-white rounded-xl border border-gray-200 text-center py-16 text-gray-400">
+                <div class="text-4xl mb-2">📅</div>
+                <p>Tidak ada data booking</p>
+            </div>
+
+            <!-- TABLE — desktop / tablet -->
+            <div v-else class="hidden md:block bg-white rounded-xl border border-gray-200 overflow-hidden">
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="bg-[#0B1F4A] text-white text-left">
@@ -127,12 +135,6 @@ const confirmDelete = (id) => {
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        <tr v-if="bookings.data.length === 0">
-                            <td colspan="6" class="text-center py-16 text-gray-400">
-                                <div class="text-4xl mb-2">📅</div>
-                                <p>Tidak ada data booking</p>
-                            </td>
-                        </tr>
                         <tr
                             v-for="b in bookings.data"
                             :key="b.id"
@@ -198,12 +200,62 @@ const confirmDelete = (id) => {
                 </table>
             </div>
 
+            <!-- CARDS — mobile -->
+            <div v-if="bookings.data.length > 0" class="md:hidden space-y-3">
+                <div
+                    v-for="b in bookings.data"
+                    :key="b.id"
+                    class="bg-white rounded-xl border border-gray-200 p-4 space-y-3"
+                >
+                    <div class="flex items-start justify-between gap-2">
+                        <span class="font-mono text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                            {{ b.nomor_booking }}
+                        </span>
+                        <span
+                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium shrink-0"
+                            :class="statusColor(b.status)"
+                        >
+                            {{ statusLabel(b.status) }}
+                        </span>
+                    </div>
+
+                    <div>
+                        <div class="font-medium text-[#0B1F4A]">{{ b.client?.nama ?? '-' }}</div>
+                        <div class="text-xs text-gray-400">{{ b.client?.no_hp ?? '' }}</div>
+                    </div>
+
+                    <div class="text-sm text-gray-600">
+                        🏘️ {{ b.property?.nama_properti ?? '-' }}
+                    </div>
+
+                    <div class="text-sm">
+                        <span class="text-[#0B1F4A] font-medium">{{ formatTanggal(b.tanggal_konsultasi) }}</span>
+                        <span class="text-gray-400 text-xs ml-1">{{ b.jam_konsultasi }}</span>
+                    </div>
+
+                    <div class="flex items-center gap-2 pt-2 border-t border-gray-100">
+                        <Link
+                            :href="route('admin.bookings.show', b.id)"
+                            class="flex-1 text-center text-xs px-3 py-2 rounded-lg bg-[#0B1F4A] text-white hover:bg-[#0d2660] transition-colors"
+                        >
+                            Detail
+                        </Link>
+                        <button
+                            @click="confirmDelete(b.id)"
+                            class="flex-1 text-center text-xs px-3 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+                        >
+                            Hapus
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Pagination -->
-            <div v-if="bookings.last_page > 1" class="flex items-center justify-between">
+            <div v-if="bookings.last_page > 1" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <p class="text-sm text-gray-500">
                     Menampilkan {{ bookings.from }}–{{ bookings.to }} dari {{ bookings.total }} data
                 </p>
-                <div class="flex gap-1">
+                <div class="flex flex-wrap gap-1">
                     <Link
                         v-for="link in bookings.links"
                         :key="link.label"
