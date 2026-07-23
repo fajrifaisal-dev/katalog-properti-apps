@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\CategoryPropertyController;
 use App\Http\Controllers\Admin\PropertyController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\Admin\ClientController;
 use Illuminate\Foundation\Application;
@@ -47,9 +48,9 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
 
     // Dashboard
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
     /*
     |--------------------------------------------------------------------------

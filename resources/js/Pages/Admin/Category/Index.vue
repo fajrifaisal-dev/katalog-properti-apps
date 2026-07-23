@@ -12,17 +12,11 @@ const props = defineProps({
     }
 })
 
-// ==============================
-// STATE MODAL
-// ==============================
 const showTambahModal = ref(false)
 const showEditModal = ref(false)
 const showHapusModal = ref(false)
 const selectedItem = ref(null)
 
-// ==============================
-// TOAST
-// ==============================
 const toast = ref({ show: false, message: '', type: 'error' })
 let toastTimeout = null
 
@@ -34,9 +28,6 @@ const showToast = (message, type = 'error') => {
     }, 3000)
 }
 
-// ==============================
-// FORM TAMBAH
-// ==============================
 const formTambah = useForm({
     nama_kategori: '',
     deskripsi: ''
@@ -51,9 +42,6 @@ const submitTambah = () => {
     })
 }
 
-// ==============================
-// FORM EDIT
-// ==============================
 const formEdit = useForm({
     nama_kategori: '',
     deskripsi: ''
@@ -75,9 +63,6 @@ const submitEdit = () => {
     })
 }
 
-// ==============================
-// TOGGLE STATUS
-// ==============================
 const toggleStatus = (item) => {
     const nextStatus = (item.status_category ?? 'aktif') === 'aktif' ? 'tidak aktif' : 'aktif'
 
@@ -92,9 +77,6 @@ const toggleStatus = (item) => {
     })
 }
 
-// ==============================
-// HAPUS
-// ==============================
 const canHapus = (item) => {
     return item.properti_count === 0 && (item.status_category ?? 'aktif') === 'tidak aktif'
 }
@@ -130,27 +112,32 @@ const confirmHapus = () => {
     <AuthenticatedLayout>
 
         <!-- HEADER -->
-        <div class="mb-6 flex items-center justify-between">
+        <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-                <h1 class="text-2xl font-semibold text-gray-800">Kategori Properti</h1>
+                <h1 class="text-xl sm:text-2xl font-semibold text-gray-800">Kategori Properti</h1>
                 <p class="text-sm text-gray-500">Kelola data kategori properti</p>
             </div>
             <button @click="showTambahModal = true"
-                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:opacity-90 text-sm">
+                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:opacity-90 text-sm self-start sm:self-auto">
                 + Tambah Kategori
             </button>
         </div>
 
         <!-- ALERT -->
-        <div v-if="page.props.flash?.success" class="mb-4 p-3 bg-green-100 text-green-700 rounded-lg">
+        <div v-if="page.props.flash?.success" class="mb-4 p-3 bg-green-100 text-green-700 rounded-lg text-sm">
             {{ page.props.flash.success }}
         </div>
-        <div v-if="page.props.flash?.error" class="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
+        <div v-if="page.props.flash?.error" class="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
             {{ page.props.flash.error }}
         </div>
 
-        <!-- TABLE -->
-        <div class="bg-white rounded-xl shadow overflow-hidden">
+        <!-- EMPTY STATE (shared) -->
+        <div v-if="props.kategori.length === 0" class="bg-white rounded-xl shadow text-center p-8 text-gray-500">
+            Belum ada data kategori
+        </div>
+
+        <!-- TABLE — desktop / tablet -->
+        <div v-else class="hidden md:block bg-white rounded-xl shadow overflow-hidden">
             <table class="w-full text-sm">
                 <thead class="bg-gray-100">
                     <tr>
@@ -167,7 +154,6 @@ const confirmHapus = () => {
                         <td class="p-3 text-gray-600">{{ item.deskripsi || '-' }}</td>
                         <td class="p-3 text-center">{{ item.properti_count }}</td>
 
-                        <!-- TOGGLE STATUS -->
                         <td class="p-3 text-center">
                             <button
                                 @click="toggleStatus(item)"
@@ -185,7 +171,6 @@ const confirmHapus = () => {
                             </button>
                         </td>
 
-                        <!-- AKSI -->
                         <td class="p-3 text-center space-x-2">
                             <button @click="openEdit(item)"
                                 class="bg-yellow-400 text-white px-3 py-1 rounded hover:opacity-90 text-xs">
@@ -197,19 +182,58 @@ const confirmHapus = () => {
                             </button>
                         </td>
                     </tr>
-                    <tr v-if="props.kategori.length === 0">
-                        <td colspan="5" class="text-center p-4 text-gray-500">
-                            Belum ada data kategori
-                        </td>
-                    </tr>
                 </tbody>
             </table>
+        </div>
+
+        <!-- CARDS — mobile -->
+        <div v-if="props.kategori.length > 0" class="md:hidden space-y-3">
+            <div
+                v-for="item in props.kategori"
+                :key="item.id"
+                class="bg-white rounded-xl shadow p-4 space-y-3"
+            >
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <div class="font-medium text-gray-800">{{ item.nama_kategori }}</div>
+                        <div class="text-xs text-gray-500 mt-0.5">{{ item.deskripsi || '-' }}</div>
+                    </div>
+                    <button
+                        @click="toggleStatus(item)"
+                        type="button"
+                        role="switch"
+                        :aria-checked="(item.status_category ?? 'aktif') === 'aktif'"
+                        class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0"
+                        :class="(item.status_category ?? 'aktif') === 'aktif' ? 'bg-green-500' : 'bg-gray-300'"
+                    >
+                        <span
+                            class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"
+                            :class="(item.status_category ?? 'aktif') === 'aktif' ? 'translate-x-6' : 'translate-x-1'"
+                        ></span>
+                    </button>
+                </div>
+
+                <div class="text-xs text-gray-500">
+                    Total Properti: <span class="font-semibold text-gray-700">{{ item.properti_count }}</span>
+                </div>
+
+                <div class="flex items-center gap-2 pt-2 border-t border-gray-100">
+                    <button @click="openEdit(item)"
+                        class="flex-1 bg-yellow-400 text-white px-3 py-2 rounded hover:opacity-90 text-xs">
+                        Edit
+                    </button>
+                    <button @click="openHapus(item)"
+                        class="flex-1 bg-red-500 text-white px-3 py-2 rounded hover:opacity-90 text-xs">
+                        Hapus
+                    </button>
+                </div>
+            </div>
         </div>
 
         <!-- ==============================
             MODAL TAMBAH
         ============================== -->
-        <div v-if="showTambahModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div v-if="showTambahModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
             <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
                 <h2 class="text-lg font-semibold mb-4">Tambah Kategori</h2>
 
@@ -250,7 +274,7 @@ const confirmHapus = () => {
         <!-- ==============================
              MODAL EDIT
         ============================== -->
-        <div v-if="showEditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div v-if="showEditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
             <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
                 <h2 class="text-lg font-semibold mb-4">Edit Kategori</h2>
 
@@ -290,7 +314,7 @@ const confirmHapus = () => {
         <!-- ==============================
              MODAL HAPUS
         ============================== -->
-        <div v-if="showHapusModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div v-if="showHapusModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
             <div class="bg-white rounded-xl shadow-lg w-full max-w-sm p-6">
                 <h2 class="text-lg font-semibold mb-2">Hapus Kategori</h2>
                 <p class="text-sm text-gray-600 mb-6">
@@ -324,7 +348,7 @@ const confirmHapus = () => {
         >
             <div
                 v-if="toast.show"
-                class="fixed bottom-6 right-6 z-[60] px-4 py-3 rounded-lg shadow-lg text-sm text-white"
+                class="fixed bottom-6 right-6 z-[60] px-4 py-3 rounded-lg shadow-lg text-sm text-white max-w-[90vw]"
                 :class="toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'"
             >
                 {{ toast.message }}

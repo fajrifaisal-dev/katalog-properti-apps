@@ -31,7 +31,6 @@ const formatRupiah = (val) => {
     }).format(val)
 }
 
-// 🔥 FORMAT INPUT
 const formatRupiahInput = (value) => {
     if (!value) return ''
     return new Intl.NumberFormat('id-ID').format(value)
@@ -131,7 +130,6 @@ const confirmHapus = () => {
     })
 }
 
-
 // ==============================
 // PAGINATION
 // ==============================
@@ -144,22 +142,25 @@ const goToPage = (url) => {
     <AuthenticatedLayout>
 
         <!-- HEADER -->
-        <div class="mb-6 flex items-center justify-between">
+        <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-                <h1 class="text-2xl font-semibold text-gray-800">Manajemen Properti</h1>
+                <h1 class="text-xl sm:text-2xl font-semibold text-gray-800">Manajemen Properti</h1>
                 <p class="text-sm text-gray-500">Kelola data properti yang tersedia</p>
             </div>
-            <button @click="showTambahModal = true" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
+            <button @click="showTambahModal = true" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm self-start sm:self-auto">
                 + Tambah Properti
             </button>
         </div>
 
-        <!-- TABLE -->
-        <div class="bg-white rounded-xl shadow overflow-hidden">
+        <!-- EMPTY STATE (shared) -->
+        <div v-if="props.properties.data.length === 0" class="bg-white rounded-xl shadow text-center p-8 text-gray-500">
+            Belum ada data properti
+        </div>
+
+        <!-- TABLE — desktop / tablet -->
+        <div v-else class="hidden md:block bg-white rounded-xl shadow overflow-hidden">
             <div class="w-full overflow-x-auto">
                 <table class="min-w-[1100px] text-sm border-collapse">
-
-                    <!-- HEADER -->
                     <thead class="bg-gray-100">
                         <tr>
                             <th class="p-3 text-left whitespace-nowrap">Gambar</th>
@@ -170,11 +171,8 @@ const goToPage = (url) => {
                             <th class="p-3 text-center whitespace-nowrap">Aksi</th>
                         </tr>
                     </thead>
-
-                    <!-- BODY -->
                     <tbody>
                         <tr v-for="item in props.properties.data" :key="item.id" class="border-b hover:bg-gray-50">
-                            <!-- GAMBAR -->
                             <td class="p-3 whitespace-nowrap">
                                 <img v-if="item.gambar" :src="`/storage/${item.gambar}`"
                                     class="w-16 h-12 object-cover rounded" />
@@ -184,17 +182,14 @@ const goToPage = (url) => {
                                 </div>
                             </td>
 
-                            <!-- NAMA -->
                             <td class="p-3 whitespace-nowrap font-medium">
                                 {{ item.nama_properti }}
                             </td>
 
-                            <!-- KATEGORI -->
                             <td class="p-3 whitespace-nowrap text-gray-600">
                                 {{ item.kategori?.nama_kategori || '-' }}
                             </td>
 
-                            <!-- 🔥 LOKASI (GOOGLE MAP + HANDLE TEXT PANJANG) -->
                             <td class="p-3 text-gray-600 max-w-[300px] break-words">
                                 <a :href="`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.lokasi)}`"
                                     target="_blank" class="text-blue-600 hover:underline">
@@ -202,12 +197,10 @@ const goToPage = (url) => {
                                 </a>
                             </td>
 
-                            <!-- HARGA -->
                             <td class="p-3 text-right font-semibold whitespace-nowrap">
                                 {{ formatRupiah(item.harga) }}
                             </td>
 
-                            <!-- AKSI -->
                             <td class="p-3 text-center whitespace-nowrap space-x-2">
                                 <button @click="openEdit(item)"
                                     class="bg-yellow-400 text-white px-3 py-1 rounded text-xs hover:opacity-90">
@@ -219,16 +212,48 @@ const goToPage = (url) => {
                                 </button>
                             </td>
                         </tr>
-
-                        <!-- EMPTY STATE -->
-                        <tr v-if="props.properties.data.length === 0">
-                            <td colspan="6" class="text-center p-4 text-gray-500">
-                                Belum ada data properti
-                            </td>
-                        </tr>
                     </tbody>
-
                 </table>
+            </div>
+        </div>
+
+        <!-- CARDS — mobile -->
+        <div v-if="props.properties.data.length > 0" class="md:hidden space-y-3">
+            <div
+                v-for="item in props.properties.data"
+                :key="item.id"
+                class="bg-white rounded-xl shadow p-4 space-y-3"
+            >
+                <div class="flex gap-3">
+                    <img v-if="item.gambar" :src="`/storage/${item.gambar}`"
+                        class="w-20 h-16 object-cover rounded shrink-0" />
+                    <div v-else
+                        class="w-20 h-16 bg-gray-100 rounded flex items-center justify-center text-xs text-gray-400 shrink-0">
+                        No img
+                    </div>
+
+                    <div class="min-w-0 flex-1">
+                        <div class="font-medium text-gray-800 truncate">{{ item.nama_properti }}</div>
+                        <div class="text-xs text-gray-500">{{ item.kategori?.nama_kategori || '-' }}</div>
+                        <div class="font-semibold text-sm mt-1">{{ formatRupiah(item.harga) }}</div>
+                    </div>
+                </div>
+
+                <a :href="`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.lokasi)}`"
+                    target="_blank" class="block text-sm text-blue-600 hover:underline break-words">
+                    📍 {{ item.lokasi }}
+                </a>
+
+                <div class="flex items-center gap-2 pt-2 border-t border-gray-100">
+                    <button @click="openEdit(item)"
+                        class="flex-1 bg-yellow-400 text-white px-3 py-2 rounded text-xs hover:opacity-90">
+                        Edit
+                    </button>
+                    <button @click="openHapus(item)"
+                        class="flex-1 bg-red-500 text-white px-3 py-2 rounded text-xs hover:opacity-90">
+                        Hapus
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -236,26 +261,28 @@ const goToPage = (url) => {
         <!-- =========================
          MODAL TAMBAH
     ========================= -->
-        <div v-if="showTambahModal" class="fixed inset-0 flex items-center justify-center bg-black/40">
-            <div class="bg-white p-6 rounded-xl w-full max-w-lg">
+        <div v-if="showTambahModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+            <div class="bg-white p-6 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
 
                 <form @submit.prevent="submitTambah" class="space-y-3">
 
-                    <!-- NAMA -->
                     <input v-model="formTambah.nama_properti" placeholder="Nama Properti"
                         class="w-full border p-2 rounded" />
 
-                    <!-- LOKASI -->
                     <input v-model="formTambah.lokasi" placeholder="Lokasi" class="w-full border p-2 rounded" />
 
-                    <!-- 🔥 HARGA FORMAT -->
                     <input :value="formatRupiahInput(formTambah.harga)"
                         @input="formTambah.harga = parseRupiah($event.target.value)" placeholder="Harga"
                         class="w-full border p-2 rounded" />
 
-                    <button class="bg-blue-600 text-white px-4 py-2 rounded">
-                        Simpan
-                    </button>
+                    <div class="flex justify-end gap-2 pt-2">
+                        <button type="button" @click="showTambahModal = false" class="px-4 py-2 text-sm">
+                            Batal
+                        </button>
+                        <button class="bg-blue-600 text-white px-4 py-2 rounded text-sm">
+                            Simpan
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -263,16 +290,14 @@ const goToPage = (url) => {
         <!-- =========================
          MODAL EDIT
     ========================= -->
-        <div v-if="showEditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div v-if="showEditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
 
             <div class="bg-white rounded-xl w-full max-w-lg max-h-[90vh] flex flex-col">
 
-                <!-- HEADER -->
                 <div class="p-4 border-b font-semibold">
                     Edit Properti
                 </div>
 
-                <!-- CONTENT (SCROLLABLE) -->
                 <div class="p-4 overflow-y-auto space-y-3">
 
                     <form @submit.prevent="submitEdit" class="space-y-3">
@@ -304,7 +329,6 @@ const goToPage = (url) => {
 
                 </div>
 
-                <!-- FOOTER (STICKY) -->
                 <div class="p-4 border-t flex justify-end gap-2">
                     <button type="button" @click="showEditModal = false">
                         Batal
@@ -322,16 +346,14 @@ const goToPage = (url) => {
         <!-- =========================
      MODAL HAPUS
 ========================= -->
-        <div v-if="showHapusModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div v-if="showHapusModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
 
             <div class="bg-white rounded-xl w-full max-w-md p-6">
 
-                <!-- TITLE -->
                 <h2 class="text-lg font-semibold mb-2 text-gray-800">
                     Hapus Properti
                 </h2>
 
-                <!-- MESSAGE -->
                 <p class="text-sm text-gray-600 mb-4">
                     Yakin ingin menghapus properti
                     <span class="font-semibold">
@@ -339,11 +361,9 @@ const goToPage = (url) => {
                     </span> ?
                 </p>
 
-                <!-- OPTIONAL PREVIEW -->
                 <img v-if="selectedItem?.gambar" :src="`/storage/${selectedItem.gambar}`"
                     class="w-full h-32 object-cover rounded mb-4" />
 
-                <!-- ACTION -->
                 <div class="flex justify-end gap-2">
                     <button @click="showHapusModal = false" class="px-4 py-2 text-sm">
                         Batal
