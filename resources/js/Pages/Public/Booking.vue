@@ -54,7 +54,6 @@ watch(() => form.tanggal_konsultasi, async (val) => {
 
 onMounted(() => {
     flatpickr("#tanggal", {
-        minDate: "today",
         dateFormat: "Y-m-d",
     })
 })
