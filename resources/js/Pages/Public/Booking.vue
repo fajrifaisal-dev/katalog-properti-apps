@@ -11,6 +11,10 @@ const props = defineProps({
     jamList: Array,
     categories: Array,
     properties: Array,
+    selectedPropertyId: {
+        type: [Number, String, null],
+        default: null,
+    },
 })
 
 const selectedCategory = ref(null)
@@ -39,6 +43,28 @@ const form = useForm({
 
 /*
 |--------------------------------------------------------------------------
+| PRESELECT PROPERTI DARI KATALOG (jika datang dari halaman detail)
+|--------------------------------------------------------------------------
+*/
+onMounted(() => {
+    flatpickr("#tanggal", {
+        dateFormat: "Y-m-d",
+    })
+
+    if (props.selectedPropertyId) {
+        const preselected = props.properties.find(
+            item => item.id == props.selectedPropertyId
+        )
+
+        if (preselected) {
+            selectedCategory.value = preselected.kategori_id
+            form.properti_id = preselected.id
+        }
+    }
+})
+
+/*
+|--------------------------------------------------------------------------
 | FETCH SLOT SAAT TANGGAL DIPILIH
 |--------------------------------------------------------------------------
 */
@@ -50,12 +76,6 @@ watch(() => form.tanggal_konsultasi, async (val) => {
     })
 
     bookedSlots.value = res.data.booked
-})
-
-onMounted(() => {
-    flatpickr("#tanggal", {
-        dateFormat: "Y-m-d",
-    })
 })
 
 const submit = () => {

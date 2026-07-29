@@ -1,5 +1,7 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
+import SiteHeader from '@/Components/SiteHeader.vue';
+import SiteFooter from '@/Components/SiteFooter.vue';
 import { ref, onMounted } from 'vue';
 
 defineProps({
@@ -27,48 +29,7 @@ onMounted(() => setTimeout(() => (visible.value = true), 150));
         </component>
 
         <!-- NAVBAR -->
-        <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-[#0B1F4A]/08 shadow-sm">
-            <div class="max-w-7xl mx-auto px-8 h-[68px] flex items-center justify-between">
-                <!-- Logo -->
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 bg-[#0B1F4A] flex items-center justify-center rounded-sm">
-                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                            <rect x="1" y="8" width="7" height="9" fill="#C9A84C" />
-                            <rect x="10" y="4" width="7" height="13" fill="white" />
-                            <polygon points="0,8 9,1 18,4 18,4 10,4 9,2 1,8" fill="#C9A84C" />
-                        </svg>
-                    </div>
-                    <div class="flex flex-col leading-none">
-                        <span class="text-[11px] font-semibold text-[#C9A84C] tracking-[2px] uppercase">PT Insan
-                            Kapuas</span>
-                        <span class="text-[15px] font-semibold text-[#0B1F4A] tracking-tight">Khatulistiwa</span>
-                    </div>
-                </div>
-
-                <!-- Nav links -->
-                <nav v-if="canLogin" class="flex items-center gap-1">
-                    <Link v-if="$page.props.auth.user" :href="route('dashboard')"
-                        class="px-5 py-2 rounded text-sm font-medium text-[#0B1F4A] hover:bg-[#0B1F4A]/05 transition">
-                        Dashboard
-                    </Link>
-                    <template v-else>
-                        <!-- ✅ TAMBAHAN: Link Cek Booking -->
-                        <Link href="/cek-booking"
-                            class="px-5 py-2 rounded text-sm font-medium text-[#0B1F4A]/60 hover:text-[#0B1F4A] hover:bg-[#0B1F4A]/05 transition">
-                            Cek Booking
-                        </Link>
-                        <Link :href="route('login')"
-                            class="px-5 py-2 rounded text-sm font-medium text-[#0B1F4A] hover:bg-[#0B1F4A]/05 transition">
-                            Masuk
-                        </Link>
-                        <Link :href="route('booking.create')"
-                            class="ml-2 px-5 py-2.5 text-sm font-semibold bg-[#0B1F4A] text-white hover:bg-[#163472] transition rounded-sm shadow-md tracking-wide">
-                            Booking Sekarang
-                        </Link>
-                    </template>
-                </nav>
-            </div>
-        </header>
+        <SiteHeader />
 
         <!-- HERO -->
         <section class="relative overflow-hidden bg-[#0B1F4A]">
@@ -117,29 +78,18 @@ onMounted(() => setTimeout(() => (visible.value = true), 150));
                     </p>
 
                     <div class="flex flex-wrap gap-3 mb-12">
-                        <Link v-if="$page.props.auth.user" :href="route('dashboard')"
+                        <Link :href="route('katalog.index')"
                             class="inline-flex items-center gap-2 px-7 py-3.5 bg-[#C9A84C] text-[#0B1F4A] font-semibold text-sm rounded-sm hover:bg-[#E2C06A] transition shadow-lg">
-                            Buka Dashboard
+                            Lihat Katalog Properti
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                 <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.5"
                                     stroke-linecap="round" />
                             </svg>
                         </Link>
-                        <template v-else>
-                            <Link :href="route('booking.create')"
-                                class="inline-flex items-center gap-2 px-7 py-3.5 bg-[#C9A84C] text-[#0B1F4A] font-semibold text-sm rounded-sm hover:bg-[#E2C06A] transition shadow-lg">
-                                Booking Sekarang
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                    <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.5"
-                                        stroke-linecap="round" />
-                                </svg>
-                            </Link>
-                            <!-- ✅ TAMBAHAN: Cek Booking di Hero -->
-                            <Link href="/cek-booking"
-                                class="inline-flex items-center gap-2 px-7 py-3.5 border border-white/20 text-white font-semibold text-sm rounded-sm hover:bg-white/08 transition">
-                                🔎 Cek Status Booking
-                            </Link>
-                        </template>
+                        <Link href="/cek-booking"
+                            class="inline-flex items-center gap-2 px-7 py-3.5 border border-white/20 text-white font-semibold text-sm rounded-sm hover:bg-white/08 transition">
+                            🔎 Cek Status Booking
+                        </Link>
                     </div>
 
                     <div class="flex items-stretch gap-8 pt-8 border-t border-white/10">
@@ -325,7 +275,7 @@ onMounted(() => setTimeout(() => (visible.value = true), 150));
                             <div class="flex flex-wrap gap-2 mb-5">
                                 <span v-for="f in ['Listrik 1300W', 'Air PDAM', 'IMB Lengkap', 'SHM']" :key="f"
                                     class="text-[11px] bg-[#0B1F4A]/05 text-[#0B1F4A]/60 px-2.5 py-1 rounded-sm font-medium">{{
-                                    f }}</span>
+                                        f }}</span>
                             </div>
                             <Link :href="route('booking.create')"
                                 class="w-full flex items-center justify-center gap-2 py-3 bg-[#0B1F4A] text-white text-sm font-semibold rounded-sm hover:bg-[#C9A84C] hover:text-[#0B1F4A] transition-all group-hover:bg-[#163472]">
@@ -391,7 +341,7 @@ onMounted(() => setTimeout(() => (visible.value = true), 150));
                                 <span v-for="f in ['Listrik 1300W', 'Air PDAM', 'IMB Lengkap', 'SHM', 'Carport']"
                                     :key="f"
                                     class="text-[11px] bg-[#0B1F4A]/05 text-[#0B1F4A]/60 px-2.5 py-1 rounded-sm font-medium">{{
-                                    f }}</span>
+                                        f }}</span>
                             </div>
                             <Link :href="route('booking.create')"
                                 class="w-full flex items-center justify-center gap-2 py-3 bg-[#C9A84C] text-[#0B1F4A] text-sm font-semibold rounded-sm hover:bg-[#E2C06A] transition-all">
@@ -459,8 +409,10 @@ onMounted(() => setTimeout(() => (visible.value = true), 150));
             <div class="bg-white border border-[#0B1F4A]/08 rounded-sm overflow-hidden shadow-sm">
                 <div class="flex flex-col lg:flex-row items-stretch">
                     <!-- Left: Info -->
-                    <div class="bg-[#F8F5EE] border-r border-[#C9A84C]/20 px-8 py-10 lg:w-64 flex-shrink-0 flex flex-col justify-center">
-                        <div class="w-12 h-12 bg-[#C9A84C]/15 rounded-sm flex items-center justify-center text-2xl mb-4">
+                    <div
+                        class="bg-[#F8F5EE] border-r border-[#C9A84C]/20 px-8 py-10 lg:w-64 flex-shrink-0 flex flex-col justify-center">
+                        <div
+                            class="w-12 h-12 bg-[#C9A84C]/15 rounded-sm flex items-center justify-center text-2xl mb-4">
                             🔎
                         </div>
                         <h3 class="font-display text-2xl font-bold text-[#0B1F4A] mb-2 leading-tight">
@@ -481,13 +433,12 @@ onMounted(() => setTimeout(() => (visible.value = true), 150));
                                 Tidak perlu login — cukup masukkan kode booking yang Anda terima.
                             </p>
                         </div>
-                        <Link
-                            href="/cek-booking"
-                            class="flex-shrink-0 inline-flex items-center gap-2.5 px-7 py-3.5 bg-[#0B1F4A] text-white font-semibold text-sm rounded-sm hover:bg-[#163472] transition shadow-md whitespace-nowrap"
-                        >
+                        <Link href="/cek-booking"
+                            class="flex-shrink-0 inline-flex items-center gap-2.5 px-7 py-3.5 bg-[#0B1F4A] text-white font-semibold text-sm rounded-sm hover:bg-[#163472] transition shadow-md whitespace-nowrap">
                             Cek Status Booking
                             <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                                <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                                <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" />
                             </svg>
                         </Link>
                     </div>
@@ -543,59 +494,6 @@ onMounted(() => setTimeout(() => (visible.value = true), 150));
         </section>
 
         <!-- FOOTER -->
-        <footer class="bg-[#080F22] border-t border-white/05">
-            <div class="max-w-7xl mx-auto px-8 py-10">
-                <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8 mb-8">
-                    <div>
-                        <div class="flex items-center gap-3 mb-3">
-                            <div
-                                class="w-8 h-8 bg-[#0B1F4A] border border-white/10 flex items-center justify-center rounded-sm">
-                                <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
-                                    <rect x="1" y="8" width="7" height="9" fill="#C9A84C" />
-                                    <rect x="10" y="4" width="7" height="13" fill="white" opacity="0.7" />
-                                    <polygon points="0,8 9,1 18,4 18,4 10,4 9,2 1,8" fill="#C9A84C" />
-                                </svg>
-                            </div>
-                            <div>
-                                <div class="text-[10px] text-[#C9A84C] font-semibold tracking-[2px] uppercase">PT Insan
-                                    Kapuas
-                                </div>
-                                <div class="text-white text-sm font-semibold tracking-tight">Khatulistiwa</div>
-                            </div>
-                        </div>
-                        <p class="text-white/30 text-xs leading-relaxed max-w-xs">
-                            Perusahaan properti terpercaya di Kalimantan Barat.<br />
-                            Melayani dengan profesionalisme dan integritas.
-                        </p>
-                    </div>
-                    <div class="flex gap-10 text-sm text-white/30">
-                        <div>
-                            <div class="text-white/60 font-semibold mb-3 text-xs uppercase tracking-wider">Platform
-                            </div>
-                            <div class="flex flex-col gap-2">
-                                <Link href="/booking" class="hover:text-[#C9A84C] transition">Booking Konsultasi</Link>
-                                <!-- ✅ TAMBAHAN: Link cek booking di footer -->
-                                <Link href="/cek-booking" class="hover:text-[#C9A84C] transition">Cek Status Booking</Link>
-                                <span>Katalog Properti</span>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="text-white/60 font-semibold mb-3 text-xs uppercase tracking-wider">Perusahaan
-                            </div>
-                            <div class="flex flex-col gap-2">
-                                <span>Tentang Kami</span>
-                                <span>Kontak</span>
-                                <span>Lokasi</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="border-t border-white/05 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <p class="text-white/20 text-xs">© 2025 PT Insan Kapuas Khatulistiwa. Hak Cipta Dilindungi.</p>
-                    <p class="text-white/15 text-xs font-mono">Laravel v{{ laravelVersion }} · PHP v{{ phpVersion }}</p>
-                </div>
-            </div>
-        </footer>
-
+        <SiteFooter :laravel-version="laravelVersion" :php-version="phpVersion" />
     </div>
 </template>
