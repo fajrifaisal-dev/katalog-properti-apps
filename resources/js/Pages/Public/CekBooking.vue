@@ -204,6 +204,14 @@ const statusColor = (status) => {
                             <p class="text-sm text-gray-700">{{ booking.catatan }}</p>
                         </div>
 
+                        <!-- CATATAN ADMIN -->
+                        <div v-if="booking.admin_note" class="card">
+                            <p class="label">Catatan Admin</p>
+                            <p class="text-sm text-gray-700 whitespace-pre-line">
+                                {{ booking.admin_note }}
+                            </p>
+                        </div>
+
                         <!-- INFO -->
                         <div class="bg-yellow-100 text-yellow-700 p-4 rounded-lg text-sm">
                             Tim kami akan menghubungi Anda untuk konfirmasi.

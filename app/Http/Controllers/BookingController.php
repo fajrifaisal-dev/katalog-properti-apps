@@ -192,9 +192,13 @@ class BookingController extends Controller
     {
         $request->validate([
             'status' => 'required|in:Menunggu,Disetujui,Ditolak',
+            'admin_note' => 'nullable|string|max:1000',
         ]);
 
-        $booking->update(['status' => $request->status]);
+        $booking->update([
+            'status' => $request->status,
+            'admin_note' => $request->admin_note,
+        ]);
 
         return back()->with('success', 'Status booking berhasil diperbarui.');
     }

@@ -14,21 +14,22 @@ const flash = page.props.flash ?? {}
 
 const selectedStatus = ref(props.booking.status)
 const isUpdating = ref(false)
+const adminNote = ref(props.booking.admin_note ?? '')
 
 const statusColor = (s) => {
     const map = {
-        Menunggu:  'bg-yellow-100 text-yellow-700 border-yellow-200',
+        Menunggu: 'bg-yellow-100 text-yellow-700 border-yellow-200',
         Disetujui: 'bg-blue-100 text-blue-700 border-blue-200',
-        Ditolak:   'bg-red-100 text-red-700 border-red-200',
+        Ditolak: 'bg-red-100 text-red-700 border-red-200',
     }
     return map[s] ?? 'bg-gray-100 text-gray-600 border-gray-200'
 }
 
 const statusLabel = (s) => {
     const map = {
-        Menunggu:  'Menunggu',
+        Menunggu: 'Menunggu',
         Disetujui: 'Disetujui',
-        Ditolak:   'Ditolak',
+        Ditolak: 'Ditolak',
     }
     return map[s] ?? s
 }
@@ -44,9 +45,14 @@ const updateStatus = () => {
     isUpdating.value = true
     router.patch(
         route('admin.bookings.updateStatus', props.booking.id),
-        { status: selectedStatus.value },
         {
-            onFinish: () => { isUpdating.value = false }
+            status: selectedStatus.value,
+            admin_note: adminNote.value,
+        },
+        {
+            onFinish: () => {
+                isUpdating.value = false
+            }
         }
     )
 }
@@ -65,10 +71,8 @@ const confirmDelete = () => {
             <!-- Back + Header -->
             <div class="flex items-start justify-between">
                 <div>
-                    <Link
-                        :href="route('admin.bookings.index')"
-                        class="text-sm text-gray-500 hover:text-[#0B1F4A] flex items-center gap-1 mb-2 transition-colors"
-                    >
+                    <Link :href="route('admin.bookings.index')"
+                        class="text-sm text-gray-500 hover:text-[#0B1F4A] flex items-center gap-1 mb-2 transition-colors">
                         ← Kembali ke Daftar Booking
                     </Link>
                     <h1 class="text-2xl font-bold text-[#0B1F4A]">Detail Booking</h1>
@@ -76,10 +80,8 @@ const confirmDelete = () => {
                 </div>
 
                 <!-- Status badge -->
-                <span
-                    class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold border"
-                    :class="statusColor(booking.status)"
-                >
+                <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold border"
+                    :class="statusColor(booking.status)">
                     {{ statusLabel(booking.status) }}
                 </span>
             </div>
@@ -148,7 +150,8 @@ const confirmDelete = () => {
                         <div class="p-5 grid grid-cols-2 gap-4">
                             <div>
                                 <p class="text-xs text-gray-400 mb-1">Nama Properti</p>
-                                <p class="text-sm font-medium text-[#0B1F4A]">{{ booking.property?.nama_properti ?? '-' }}</p>
+                                <p class="text-sm font-medium text-[#0B1F4A]">{{ booking.property?.nama_properti ?? '-'
+                                }}</p>
                             </div>
                             <div v-if="booking.property?.kategori">
                                 <p class="text-xs text-gray-400 mb-1">Kategori</p>
@@ -168,41 +171,38 @@ const confirmDelete = () => {
                             🔄 Ubah Status
                         </div>
                         <div class="p-5 space-y-3">
-                            <div
-                                v-for="s in statusList"
-                                :key="s"
-                                @click="selectedStatus = s"
+                            <div v-for="s in statusList" :key="s" @click="selectedStatus = s"
                                 class="flex items-center gap-3 px-3 py-2.5 rounded-lg border cursor-pointer transition-all"
                                 :class="[
                                     selectedStatus === s
                                         ? 'border-[#C9A84C] bg-[#C9A84C]/10'
                                         : 'border-gray-200 hover:border-gray-300'
-                                ]"
-                            >
-                                <div
-                                    class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0"
-                                    :class="selectedStatus === s ? 'border-[#C9A84C]' : 'border-gray-300'"
-                                >
-                                    <div
-                                        v-if="selectedStatus === s"
-                                        class="w-2 h-2 rounded-full bg-[#C9A84C]"
-                                    />
+                                ]">
+                                <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0"
+                                    :class="selectedStatus === s ? 'border-[#C9A84C]' : 'border-gray-300'">
+                                    <div v-if="selectedStatus === s" class="w-2 h-2 rounded-full bg-[#C9A84C]" />
                                 </div>
-                                <span class="text-sm" :class="selectedStatus === s ? 'font-semibold text-[#0B1F4A]' : 'text-gray-600'">
+                                <span class="text-sm"
+                                    :class="selectedStatus === s ? 'font-semibold text-[#0B1F4A]' : 'text-gray-600'">
                                     {{ statusLabel(s) }}
                                 </span>
                             </div>
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Catatan Admin
+                                </label>
 
-                            <button
-                                @click="updateStatus"
-                                :disabled="isUpdating || selectedStatus === booking.status"
-                                class="w-full mt-2 py-2.5 rounded-lg text-sm font-semibold transition-all"
-                                :class="[
+                                <textarea v-model="adminNote" rows="4"
+                                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-[#0B1F4A]/20 focus:border-[#0B1F4A]"
+                                    placeholder="Tulis catatan untuk customer..."></textarea>
+                            </div>
+
+                            <button @click="updateStatus" :disabled="isUpdating || selectedStatus === booking.status"
+                                class="w-full mt-2 py-2.5 rounded-lg text-sm font-semibold transition-all" :class="[
                                     (isUpdating || selectedStatus === booking.status)
                                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                         : 'bg-[#0B1F4A] text-white hover:bg-[#0d2660]'
-                                ]"
-                            >
+                                ]">
                                 {{ isUpdating ? 'Menyimpan...' : 'Simpan Status' }}
                             </button>
                         </div>
@@ -222,10 +222,8 @@ const confirmDelete = () => {
                     </div>
 
                     <!-- Hapus -->
-                    <button
-                        @click="confirmDelete"
-                        class="w-full py-2.5 rounded-xl text-sm font-medium text-red-600 border border-red-200 hover:bg-red-50 transition-colors"
-                    >
+                    <button @click="confirmDelete"
+                        class="w-full py-2.5 rounded-xl text-sm font-medium text-red-600 border border-red-200 hover:bg-red-50 transition-colors">
                         🗑️ Hapus Booking Ini
                     </button>
 
