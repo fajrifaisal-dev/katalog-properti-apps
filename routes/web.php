@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\PropertyController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\Admin\ClientController;
+use App\Http\Controllers\PropertyCatalogController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -23,6 +24,9 @@ use Inertia\Inertia;
 */
 Route::get('/booking', [BookingController::class, 'create'])->name('booking.create');
 Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
+
+Route::get('/katalog', [PropertyCatalogController::class, 'index'])->name('katalog.index');
+Route::get('/katalog/{property}', [PropertyCatalogController::class, 'show'])->name('katalog.show');
 
 Route::get('/cek-booking', function () {
     return Inertia::render('Public/CekBooking');

@@ -25,36 +25,21 @@ class BookingController extends Controller
     | FORM BOOKING (PAGE)
     |--------------------------------------------------------------------------
     */
-    public function create()
+    public function create(Request $request)
 {
     return Inertia::render('Public/Booking', [
-
         'jamList' => [
-            '09:00',
-            '10:00',
-            '11:00',
-            '13:00',
-            '14:00',
-            '15:00'
+            '09:00', '10:00', '11:00', '13:00', '14:00', '15:00'
         ],
-
         'categories' => CategoryProperty::orderBy('nama_kategori')
-            ->get([
-                'id',
-                'nama_kategori',
-                'deskripsi'
-            ]),
-
+            ->get(['id', 'nama_kategori', 'deskripsi']),
         'properties' => Property::with('kategori')
             ->orderBy('nama_properti')
-            ->get([
-                'id',
-                'kategori_id',
-                'nama_properti',
-                'lokasi',
-                'harga',
-                'gambar'
-            ])
+            ->get(['id', 'kategori_id', 'nama_properti', 'lokasi', 'harga', 'gambar']),
+        // ✅ TAMBAHAN: preselect properti dari katalog
+        'selectedPropertyId' => $request->query('properti_id')
+            ? (int) $request->query('properti_id')
+            : null,
     ]);
 }
 
@@ -88,7 +73,7 @@ class BookingController extends Controller
         $booking = $this->bookingService->createBooking($request->all());
 
         return back()->with([
-            'success' => 'Booking berhasil dibuat!',
+            'success' => 'Booking Pengajuan anda telah di ajukan, silahkan menunggu status update nya, dengan mengecek di fitur Booking!',
             'booking_code' => $booking->nomor_booking,
             'booking_data' => [
                 'nama' => $booking->client->nama,
