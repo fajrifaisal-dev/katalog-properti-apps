@@ -20,6 +20,7 @@ class Booking extends Model
         'status',
         'nomor_booking',
         'catatan',
+        'admin_note',
     ];
 
     protected $casts = [
